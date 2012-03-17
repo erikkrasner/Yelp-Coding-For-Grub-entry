@@ -1,4 +1,6 @@
+#! /usr/bin/python
 import json
+import sys
 
 def analyze_review_sentiment(review, sentiments):
     average = 0
@@ -21,22 +23,21 @@ def make_sentiments_table():
     return sentiments_table
 
 def star_from_sentiments(review, sentiments_table):
-    return 3 + 2 * analyze_review_sentiment(review, sentiments_table)
+    return 3.0 + 2 * analyze_review_sentiment(review, sentiments_table)
 
 def predict_reviews(review_data,sentiments_table):
-    output = {}
     first_five_reviews = 50
     for raw_review in review_data:
-        # Each line of the testing data is a JSON dictionary object containing a review record.6
-        # Use simplejson's loads() function to parse this into a native Python dictionary.
+        output = {}
         review = json.loads(raw_review)
         review_id = review.get('review_id', None)
         if review_id is None:
             continue
         review_text = review.get('text', None)
         guess = star_from_sentiments(review_text, sentiments_table)
-        output[review_id] = guess
-    print json.dumps(output)
+        output['review_id'] = review_id
+        output['stars'] = guess
+        print json.dumps(output)
     
 
     
@@ -48,6 +49,7 @@ def train_and_predict(training_filename, test_filename):
         predict_reviews(test_file, sentiments_table)
 
 if __name__ == '__main__':
+    argv = sys.argv
     if len(argv) != 3:
         print("usage: %s training-data.json test-data.json" % argv[0])
     training_filename = argv[1]
